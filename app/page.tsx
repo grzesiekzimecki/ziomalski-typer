@@ -1180,6 +1180,8 @@ const showExactHits = rankedPlayers.some(
       <p>1 pkt — trafiony odwrotny wynik, czyli kiedy typowaliście 1:3, a skończyło się 3:1</p>
       <p><b>FINAŁ I MECZ O 3. MIEJSCE LICZONE SĄ PODWÓJNIE</b></p>
 
+      <p><b>WPISOWE 200 ZŁ, ROZLICZAMY SIĘ PO FINALE!</b></p>
+      
       <h3 style={rulesHeader}>LOGOWANIE / REJESTRACJA</h3>
       <p>Mamy dwie opcje logowania:</p>
       <p><b>a) poprzez konto Google</b><br/>
