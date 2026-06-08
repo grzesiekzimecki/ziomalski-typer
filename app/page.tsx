@@ -984,6 +984,22 @@ const hasAnyTiebreak = rankedPlayers.some((player, index) =>
           <button style={joinButtonStyle} onClick={joinLeague}>
             Dołącz do ligi
           </button>
+          <button
+  onClick={async () => {
+    await supabase.auth.signOut()
+    window.location.href = "/"
+  }}
+  style={{
+    marginTop: 12,
+    background: "transparent",
+    border: "none",
+    color: "#888",
+    cursor: "pointer",
+    textDecoration: "underline",
+  }}
+>
+  ← Wyloguj się
+</button>
 
           {message && <div style={{ marginTop: 15 }}>{message}</div>}
         </div>
