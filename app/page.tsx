@@ -539,7 +539,13 @@ const hasAnyTiebreak = rankedPlayers.some((player, index) =>
       otherIndex !== index && other.points === player.points
   )
 )
+function getMissingTypers(matchId: string) {
+  const typedEmails = predictions
+    .filter((p) => p.match_id === matchId)
+    .map((p) => p.user_email)
 
+  return players.filter((player) => !typedEmails.includes(player.email))
+}
   function renderMatch(match: any) {
     const status = predictionStatus(match)
 
@@ -839,7 +845,49 @@ const hasAnyTiebreak = rankedPlayers.some((player, index) =>
                       style={scoreInput}
                     />
                   </div>
+<div
+  style={{
+    marginTop: 20,
+    padding: 16,
+    borderRadius: 16,
+    background: "rgba(0,0,0,0.25)",
+    border: "1px solid rgba(255,255,255,0.15)",
+  }}
+>
+  <div style={{ fontWeight: 900, color: "#ffd700", marginBottom: 10 }}>
+    🕵️ Kto jeszcze nie zagrał?
+  </div>
 
+  {getMissingTypers(match.id).length === 0 ? (
+    <div style={{ color: "#7CFF7C", fontWeight: 800 }}>
+      ✅ Wszyscy już wytypowali ten mecz
+    </div>
+  ) : (
+    <>
+      <div style={{ color: "#fff", marginBottom: 8 }}>
+        Brakuje: {getMissingTypers(match.id).length}/{players.length}
+      </div>
+
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+        {getMissingTypers(match.id).map((player) => (
+          <span
+            key={player.email}
+            style={{
+              padding: "6px 10px",
+              borderRadius: 999,
+              background: "rgba(255,255,255,0.12)",
+              color: "#fff",
+              fontWeight: 800,
+              fontSize: 14,
+            }}
+          >
+            {player.nickname}
+          </span>
+        ))}
+      </div>
+    </>
+  )}
+</div>
                   <button
                     style={adminButton}
                     onClick={() => savePredictionForPlayer(match.id)}
