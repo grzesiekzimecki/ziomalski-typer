@@ -1223,8 +1223,8 @@ const showExactHits = rankedPlayers.some(
       </div>
 
       <h3 style={rulesHeader}>NAGRODY I PUNKTACJA</h3>
-      <p><b>🏆 ZWYCIĘZCA: 6000 PLN</b></p>
-      <p><b>🥈 DRUGIE MIEJSCE: 3000 PLN</b></p>
+      <p><b>🏆 ZWYCIĘZCA: 7000 PLN</b></p>
+      <p><b>🥈 DRUGIE MIEJSCE: 2000 PLN</b></p>
       <p><b>🥉 TRZECIE MIEJSCE: 1000 PLN</b></p>
       <p><b>4️⃣ MIEJSCE: 200 PLN</b></p>
       <p><b>5️⃣ MIEJSCE: GRA ZA FREE</b></p>
