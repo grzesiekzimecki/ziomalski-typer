@@ -1151,6 +1151,8 @@ const showExactHits = rankedPlayers.some(
               {position === 1 && "👑 "}
               {position === 2 && "🥈 "}
               {position === 3 && "🥉 "}
+              {position === 4 && "💎 "}
+              {position === 5 && "💎 "}
               {position}. {player.nickname}
             </div>
 
