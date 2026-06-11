@@ -1222,13 +1222,20 @@ const showExactHits = rankedPlayers.some(
   
       </div>
 
-      <h3 style={rulesHeader}>PUNKTACJA</h3>
+      <h3 style={rulesHeader}>NAGRODY I PUNKTACJA</h3>
+      <p><b>🏆 ZWYCIĘZCA: 6000 PLN</b></p>
+      <p><b>🥈 DRUGIE MIEJSCE: 3000 PLN</b></p>
+      <p><b>🥉 TRZECIE MIEJSCE: 1000 PLN</b></p>
+      <p><b>4️⃣ MIEJSCE: 200 PLN</b></p>
+      <p><b>5️⃣ MIEJSCE: GRA ZA FREE</b></p>
+
+      <p><b>WPISOWE 200 ZŁ, ROZLICZAMY SIĘ PO FINALE WEDŁUG LISTY!</b></p>
+      <p>Pierwsza PIĄTKA gra za free!</p>
+      
       <p>3 pkt — trafiony dokładny wynik</p>
       <p>1 pkt — trafiony zwycięzca, ale zły wynik</p>
       <p>1 pkt — trafiony odwrotny wynik, czyli kiedy typowaliście 1:3, a skończyło się 3:1</p>
       <p><b>FINAŁ I MECZ O 3. MIEJSCE LICZONE SĄ PODWÓJNIE</b></p>
-
-      <p><b>WPISOWE 200 ZŁ, ROZLICZAMY SIĘ PO FINALE!</b></p>
       
       <h3 style={rulesHeader}>LOGOWANIE / REJESTRACJA</h3>
       <p>Mamy dwie opcje logowania:</p>
