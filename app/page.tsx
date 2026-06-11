@@ -171,9 +171,17 @@ const [showUpcoming, setShowUpcoming] = useState(false)
     await supabase.auth.signOut()
     location.reload()
   }
-
+  function isRegistrationClosed() {
+  const deadline = new Date("2026-06-11T20:30:00+02:00")
+  return new Date() >= deadline
+}
   async function joinLeague() {
     if (!user) return
+
+    if (isRegistrationClosed()) {
+  setMessage("Rejestracja została zakończona. Turniej już wystartował.")
+  return
+}
 
     const { data: existing } = await supabase
       .from("players")
@@ -1029,9 +1037,15 @@ function getMissingTypers(matchId: string) {
             onChange={(e) => setNickname(e.target.value)}
           />
 
-          <button style={joinButtonStyle} onClick={joinLeague}>
-            Dołącz do ligi
-          </button>
+         {isRegistrationClosed() ? (
+  <div style={closedText}>
+    🚫 Rejestracja została zakończona. Turniej już wystartował.
+  </div>
+) : (
+  <button style={joinButtonStyle} onClick={joinLeague}>
+    Dołącz do ligi
+  </button>
+)}
           <button
   onClick={async () => {
     await supabase.auth.signOut()
