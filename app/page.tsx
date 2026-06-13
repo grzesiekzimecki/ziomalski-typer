@@ -1242,7 +1242,7 @@ const showExactHits = rankedPlayers.some(
       <p><b>🏆 ZWYCIĘZCA: 7000 PLN</b></p>
       <p><b>🥈 DRUGIE MIEJSCE: 3000 PLN</b></p>
       <p><b>🥉 TRZECIE MIEJSCE: 1000 PLN</b></p>
-      <p><b>4️⃣ MIEJSCE: 400 PLN</b></p>
+      <p><b>4️⃣ MIEJSCE: 200 PLN</b></p>
       <p><b>5️⃣ MIEJSCE: GRA ZA FREE</b></p>
 
       <p><b>WPISOWE 200 ZŁ, ROZLICZAMY SIĘ PO FINALE WEDŁUG LISTY!</b></p>
