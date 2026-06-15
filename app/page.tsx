@@ -557,11 +557,17 @@ function getMissingTypers(matchId: string) {
   function renderMatch(match: any) {
     const status = predictionStatus(match)
 
-    const myPrediction = predictions.find(
-      (p) => p.user_email === user?.email && p.match_id === match.id
-    )
+    const currentUserEmail = user?.email?.toLowerCase().trim()
 
-    const matchPredictions = predictions.filter((p) => p.match_id === match.id)
+const myPrediction = predictions.find(
+  (p) =>
+    p.user_email?.toLowerCase().trim() === currentUserEmail &&
+    Number(p.match_id) === Number(match.id)
+)
+
+    const matchPredictions = predictions.filter(
+  (p) => Number(p.match_id) === Number(match.id)
+)
 
     const homeWinsCount = matchPredictions.filter(
       (p) => p.home_score > p.away_score
