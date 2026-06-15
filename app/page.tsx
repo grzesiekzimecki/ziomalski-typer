@@ -252,162 +252,188 @@ const [showUpcoming, setShowUpcoming] = useState(false)
     }
   }
 
-  async function savePrediction(matchId: string) {
-    if (!user) return
+ async function savePrediction(matchId: string) {
+  if (!user?.email) return
 
-    const alreadyTyped = predictions.find(
-  (p) => p.user_email === user.email && Number(p.match_id) === Number(matchId)
-)
+  const userEmail = user.email.toLowerCase().trim()
 
-if (alreadyTyped) {
-  alert("Już typowałeś ten mecz. Typu nie można zmienić.")
-  return
-}
+  const alreadyTyped = predictions.find(
+    (p) =>
+      p.user_email?.toLowerCase().trim() === userEmail &&
+      Number(p.match_id) === Number(matchId)
+  )
 
-const home = Number(homeScores[matchId] || 0)
-const away = Number(awayScores[matchId] || 0)
-
-const { data, error } = await supabase
-  .from("predictions")
-  .insert({
-    user_email: user.email,
-    match_id: Number(matchId),
-    home_score: home,
-    away_score: away,
-    points_awarded: 0,
-  })
-  .select()
-  .single()
-
-if (error) {
-  alert(error.message)
-  await loadPredictions()
-  return
-}
-
-setPredictions((prev) => [...prev, data])
-
-alert("Typ zapisany 🖊️")
+  if (alreadyTyped) {
+    alert("Już typowałeś ten mecz. Typu nie można zmienić.")
+    return
   }
 
-  async function savePredictionForPlayer(matchId: string) {
-    const selectedEmail = adminSelectedPlayer[matchId]
+  const home = Number(homeScores[matchId] || 0)
+  const away = Number(awayScores[matchId] || 0)
 
-    if (!selectedEmail) {
-      alert("Wybierz ziomala")
-      return
-    }
-
-    const home = Number(adminPredictionHome[matchId] || 0)
-    const away = Number(adminPredictionAway[matchId] || 0)
-
-    const match = matches.find((m) => m.id === matchId)
-    let points = 0
-
-    if (match?.finished) {
-      const isDoublePoints =
-  match.stage === "Finał" || match.stage === "Mecz o 3 miejsce"
-
-points = calculatePoints(
-  home,
-  away,
-  match.home_score,
-  match.away_score,
-  isDoublePoints
-)
-    }
-
-    const { error } = await supabase.from("predictions").upsert(
+  const { data, error } = await supabase
+    .from("predictions")
+    .upsert(
       {
-        user_email: selectedEmail,
-        match_id: matchId,
+        user_email: userEmail,
+        match_id: Number(matchId),
         home_score: home,
         away_score: away,
-        points_awarded: points,
+        points_awarded: 0,
       },
       { onConflict: "user_email,match_id" }
     )
+    .select()
+    .single()
 
-    if (error) {
-      alert(error.message)
-    } else {
-      await recalculateAllPoints()
-      alert("Typ za ziomala zapisany ✅")
-      loadPredictions()
-      loadPlayers()
+  if (error) {
+    alert(error.message)
+    await loadPredictions()
+    return
+  }
+
+  setPredictions((prev) => [
+    ...prev.filter(
+      (p) =>
+        !(
+          p.user_email?.toLowerCase().trim() === userEmail &&
+          Number(p.match_id) === Number(matchId)
+        )
+    ),
+    data,
+  ])
+
+  alert("Typ zapisany 🖊️")
+}
+
+async function savePredictionForPlayer(matchId: string) {
+  const selectedEmail = adminSelectedPlayer[matchId]?.toLowerCase().trim()
+
+  if (!selectedEmail) {
+    alert("Wybierz ziomala")
+    return
+  }
+
+  const home = Number(adminPredictionHome[matchId] || 0)
+  const away = Number(adminPredictionAway[matchId] || 0)
+
+  const match = matches.find((m) => Number(m.id) === Number(matchId))
+  let points = 0
+
+  if (match?.finished) {
+    const isDoublePoints =
+      match.stage === "Finał" || match.stage === "Mecz o 3 miejsce"
+
+    points = calculatePoints(
+      home,
+      away,
+      match.home_score,
+      match.away_score,
+      isDoublePoints
+    )
+  }
+
+  const { error } = await supabase.from("predictions").upsert(
+    {
+      user_email: selectedEmail,
+      match_id: Number(matchId),
+      home_score: home,
+      away_score: away,
+      points_awarded: points,
+    },
+    { onConflict: "user_email,match_id" }
+  )
+
+  if (error) {
+    alert(error.message)
+  } else {
+    await recalculateAllPoints()
+    alert("Typ za ziomala zapisany ✅")
+    await loadPredictions()
+    await loadPlayers()
+  }
+}
+
+async function saveOfficialResult(matchId: string) {
+  const home = Number(adminHomeScores[matchId] || 0)
+  const away = Number(adminAwayScores[matchId] || 0)
+
+  const { error } = await supabase
+    .from("matches")
+    .update({
+      home_score: home,
+      away_score: away,
+      finished: true,
+    })
+    .eq("id", Number(matchId))
+
+  if (error) {
+    alert(error.message)
+    return
+  }
+
+  const { data: matchPredictions } = await supabase
+    .from("predictions")
+    .select("*")
+    .eq("match_id", Number(matchId))
+
+  const currentMatch = matches.find((m) => Number(m.id) === Number(matchId))
+
+  if (matchPredictions && currentMatch) {
+    for (const prediction of matchPredictions) {
+      const isDoublePoints =
+        currentMatch.stage === "Finał" ||
+        currentMatch.stage === "Mecz o 3 miejsce"
+
+      const points = calculatePoints(
+        prediction.home_score,
+        prediction.away_score,
+        home,
+        away,
+        isDoublePoints
+      )
+
+      await supabase
+        .from("predictions")
+        .update({ points_awarded: points })
+        .eq("id", prediction.id)
     }
   }
 
-  async function saveOfficialResult(matchId: string) {
-    const home = Number(adminHomeScores[matchId] || 0)
-    const away = Number(adminAwayScores[matchId] || 0)
+  await recalculateAllPoints()
 
-    const { error } = await supabase
-      .from("matches")
-      .update({
-        home_score: home,
-        away_score: away,
-        finished: true,
-      })
-      .eq("id", matchId)
+  alert("Wynik zapisany i punkty policzone ✅")
+  await loadMatches()
+  await loadPredictions()
+  await loadPlayers()
+}
 
-    if (error) {
-      alert(error.message)
-      return
-    }
+function predictionStatus(match: any) {
+  const matchDate = new Date(`${match.match_date}T${match.match_time}:00`)
+  const now = new Date()
+  const openDate = new Date(matchDate)
 
-    const { data: matchPredictions } = await supabase
-      .from("predictions")
-      .select("*")
-      .eq("match_id", matchId)
+  openDate.setDate(openDate.getDate() - 3)
 
-    if (matchPredictions) {
-      for (const prediction of matchPredictions) {
-        const isDoublePoints =
-  matches.find((m) => m.id === matchId)?.stage === "Finał" ||
-  matches.find((m) => m.id === matchId)?.stage === "Mecz o 3 miejsce"
+  if (now < openDate) return "too_early"
+  if (now >= matchDate) return "closed"
 
-const points = calculatePoints(
-  prediction.home_score,
-  prediction.away_score,
-  home,
-  away,
-  isDoublePoints
+  return "open"
+}
+
+const currentPlayer = players.find(
+  (p) => p.email?.toLowerCase().trim() === user?.email?.toLowerCase().trim()
 )
 
-        await supabase
-          .from("predictions")
-          .update({ points_awarded: points })
-          .eq("id", prediction.id)
-      }
-    }
+const currentPosition =
+  players.findIndex(
+    (p) => p.email?.toLowerCase().trim() === user?.email?.toLowerCase().trim()
+  ) + 1
 
-    await recalculateAllPoints()
+const isAdmin =
+  user?.email?.toLowerCase().trim() === ADMIN_EMAIL.toLowerCase().trim()
 
-    alert("Wynik zapisany i punkty policzone ✅")
-    loadMatches()
-    loadPredictions()
-    loadPlayers()
-  }
-
-  function predictionStatus(match: any) {
-    const matchDate = new Date(`${match.match_date}T${match.match_time}:00`)
-    const now = new Date()
-    const openDate = new Date(matchDate)
-
-    openDate.setDate(openDate.getDate() - 3)
-
-    if (now < openDate) return "too_early"
-    if (now >= matchDate) return "closed"
-
-    return "open"
-  }
-
-  const currentPlayer = players.find((p) => p.email === user?.email)
-  const currentPosition = players.findIndex((p) => p.email === user?.email) + 1
-  const isAdmin = user?.email === ADMIN_EMAIL
-
- const openMatches = matches.filter(
+const openMatches = matches.filter(
   (match) =>
     !match.finished &&
     (predictionStatus(match) === "open" || predictionStatus(match) === "closed")
@@ -427,7 +453,9 @@ const finishedMatches = matches
 
 const myOpenPredictions = openMatches.filter((match) =>
   predictions.some(
-    (p) => p.user_email === user?.email && p.match_id === match.id
+    (p) =>
+      p.user_email?.toLowerCase().trim() === user?.email?.toLowerCase().trim() &&
+      Number(p.match_id) === Number(match.id)
   )
 )
 
@@ -569,7 +597,7 @@ function getMissingTypers(matchId: string) {
 
 const myPrediction = predictions.find(
   (p) =>
-    p.user_email?.toLowerCase().trim() === currentUserEmail &&
+    p.user_email?.toLowerCase().trim() === user?.email?.toLowerCase().trim() &&
     Number(p.match_id) === Number(match.id)
 )
 
