@@ -257,16 +257,27 @@ const [showUpcoming, setShowUpcoming] = useState(false)
 
   const userEmail = user.email.toLowerCase().trim()
 
-  const alreadyTyped = predictions.find(
-    (p) =>
-      p.user_email?.toLowerCase().trim() === userEmail &&
-      Number(p.match_id) === Number(matchId)
-  )
+  const { data: existingPrediction } = await supabase
+  .from("predictions")
+  .select("*")
+  .eq("user_email", userEmail)
+  .eq("match_id", Number(matchId))
+  .maybeSingle()
 
-  if (alreadyTyped) {
-    alert("Już typowałeś ten mecz. Typu nie można zmienić.")
-    return
-  }
+if (existingPrediction) {
+  alert("Już typowałeś ten mecz. Typu nie można zmienić.")
+  setPredictions((prev) => [
+    ...prev.filter(
+      (p) =>
+        !(
+          p.user_email?.toLowerCase().trim() === userEmail &&
+          Number(p.match_id) === Number(matchId)
+        )
+    ),
+    existingPrediction,
+  ])
+  return
+}
 
   const home = Number(homeScores[matchId] || 0)
   const away = Number(awayScores[matchId] || 0)
