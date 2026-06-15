@@ -256,30 +256,30 @@ const [showUpcoming, setShowUpcoming] = useState(false)
     if (!user) return
 
     const alreadyTyped = predictions.find(
-      (p) => p.user_email === user.email && p.match_id === matchId
-    )
+  (p) => p.user_email === user.email && Number(p.match_id) === Number(matchId)
+)
 
-    if (alreadyTyped) {
-      alert("Już typowałeś ten mecz. Typu nie można zmienić.")
-      return
-    }
+if (alreadyTyped) {
+  alert("Już typowałeś ten mecz. Typu nie można zmienić.")
+  return
+}
 
-    const home = Number(homeScores[matchId] || 0)
-    const away = Number(awayScores[matchId] || 0)
+const home = Number(homeScores[matchId] || 0)
+const away = Number(awayScores[matchId] || 0)
 
-    const { error } = await supabase.from("predictions").insert({
-      user_email: user.email,
-      match_id: matchId,
-      home_score: home,
-      away_score: away,
-      points_awarded: 0,
-    })
+const { error } = await supabase.from("predictions").insert({
+  user_email: user.email,
+  match_id: Number(matchId),
+  home_score: home,
+  away_score: away,
+  points_awarded: 0,
+})
 
-    if (error) alert(error.message)
-    else {
-      alert("Typ zapisany 🚀")
-      loadPredictions()
-    }
+if (error) alert(error.message)
+else {
+  alert("Typ zapisany 🖊️")
+  await loadPredictions()
+}
   }
 
   async function savePredictionForPlayer(matchId: string) {
