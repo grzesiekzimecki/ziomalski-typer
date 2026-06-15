@@ -117,10 +117,33 @@ const [showUpcoming, setShowUpcoming] = useState(false)
     if (data) setMatches(data)
   }
 
-  async function loadPredictions() {
-    const { data } = await supabase.from("predictions").select("*")
-    if (data) setPredictions(data)
+ async function loadPredictions() {
+  let allPredictions: any[] = []
+  let from = 0
+  const step = 1000
+
+  while (true) {
+    const { data, error } = await supabase
+      .from("predictions")
+      .select("*")
+      .range(from, from + step - 1)
+
+    if (error) {
+      console.error(error)
+      break
+    }
+
+    if (!data || data.length === 0) break
+
+    allPredictions = [...allPredictions, ...data]
+
+    if (data.length < step) break
+
+    from += step
   }
+
+  setPredictions(allPredictions)
+}
 
   async function signInWithGoogle() {
     await supabase.auth.signInWithOAuth({ provider: "google" })
