@@ -267,19 +267,27 @@ if (alreadyTyped) {
 const home = Number(homeScores[matchId] || 0)
 const away = Number(awayScores[matchId] || 0)
 
-const { error } = await supabase.from("predictions").insert({
-  user_email: user.email,
-  match_id: Number(matchId),
-  home_score: home,
-  away_score: away,
-  points_awarded: 0,
-})
+const { data, error } = await supabase
+  .from("predictions")
+  .insert({
+    user_email: user.email,
+    match_id: Number(matchId),
+    home_score: home,
+    away_score: away,
+    points_awarded: 0,
+  })
+  .select()
+  .single()
 
-if (error) alert(error.message)
-else {
-  alert("Typ zapisany 🖊️")
+if (error) {
+  alert(error.message)
   await loadPredictions()
+  return
 }
+
+setPredictions((prev) => [...prev, data])
+
+alert("Typ zapisany 🖊️")
   }
 
   async function savePredictionForPlayer(matchId: string) {
