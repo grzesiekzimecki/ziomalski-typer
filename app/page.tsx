@@ -255,25 +255,49 @@ const [showUpcoming, setShowUpcoming] = useState(false)
 }
 
   async function recalculateAllPoints() {
-    const { data: allPredictions } = await supabase
+  let allPredictions: any[] = []
+  let from = 0
+  const step = 1000
+
+  while (true) {
+    const { data, error } = await supabase
       .from("predictions")
       .select("*")
+      .range(from, from + step - 1)
 
-    const { data: allPlayers } = await supabase.from("players").select("*")
+    if (error) {
+      console.error(error)
+      return
+    }
 
-    if (allPredictions && allPlayers) {
-      for (const player of allPlayers) {
-        const total = allPredictions
-          .filter((p) => p.user_email === player.email)
-          .reduce((sum, p) => sum + Number(p.points_awarded || 0), 0)
+    if (!data || data.length === 0) break
 
-        await supabase
-          .from("players")
-          .update({ points: total })
-          .eq("email", player.email)
-      }
+    allPredictions = [...allPredictions, ...data]
+
+    if (data.length < step) break
+
+    from += step
+  }
+
+  const { data: allPlayers } = await supabase.from("players").select("*")
+
+  if (allPlayers) {
+    for (const player of allPlayers) {
+      const total = allPredictions
+        .filter(
+          (p) =>
+            p.user_email?.toLowerCase().trim() ===
+            player.email?.toLowerCase().trim()
+        )
+        .reduce((sum, p) => sum + Number(p.points_awarded || 0), 0)
+
+      await supabase
+        .from("players")
+        .update({ points: total })
+        .eq("email", player.email)
     }
   }
+}
 
  async function savePrediction(matchId: string) {
   if (!user?.email) return
